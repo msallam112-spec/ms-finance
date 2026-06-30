@@ -1,0 +1,10 @@
+{
+  "name": "MS Finance",
+  "short_name": "MS Finance",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#070707",
+  "theme_color": "#d4af37",
+  "dir": "rtl",
+  "lang": "ar"
+}

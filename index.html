@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>MS Finance</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#d4af37">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="MS Finance">
+<style>
+:root{--bg:#070707;--card:#151515;--card2:#202020;--gold:#d4af37;--text:#f6f2e8;--muted:#aaa;--line:#303030}
+*{box-sizing:border-box}body{margin:0;background:linear-gradient(145deg,#050505,#171717);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Tahoma,Arial;color:var(--text)}
+header{padding:24px 18px;text-align:center;border-bottom:1px solid var(--line);background:#090909}
+h1{margin:0;color:var(--gold);font-size:28px}h2{color:var(--gold);margin:0 0 12px}.sub{color:var(--muted);margin:8px 0 0}
+.wrap{max-width:1150px;margin:auto;padding:16px}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px}
+.card{background:linear-gradient(180deg,var(--card),#101010);border:1px solid #2a2a2a;border-radius:22px;padding:18px;box-shadow:0 10px 30px #0008}
+.label{color:var(--muted);font-size:13px}.val{font-size:27px;font-weight:900;margin-top:8px}.gold{color:var(--gold)}.small{font-size:13px;color:var(--muted)}
+.progress{height:15px;background:#333;border-radius:50px;overflow:hidden}.bar{height:100%;background:linear-gradient(90deg,#8b6f1f,var(--gold),#ffdf70);width:0%}
+table{width:100%;border-collapse:collapse;margin-top:8px}th,td{border-bottom:1px solid #2a2a2a;padding:12px;text-align:right}th{color:var(--gold);background:#111}
+input,select{width:100%;padding:13px;border-radius:14px;border:1px solid #333;background:#0c0c0c;color:#fff;font-size:16px;margin-top:6px}
+button{width:100%;padding:14px;border:0;border-radius:14px;background:var(--gold);color:#101010;font-weight:900;font-size:16px;margin-top:10px}
+.row{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px}.pill{display:inline-block;padding:7px 12px;border:1px solid #3a3a3a;border-radius:999px;color:var(--gold);font-size:12px;margin-top:6px}
+footer{text-align:center;color:#777;padding:30px}.note{border:1px solid #3a3214;background:#17140a}
+</style>
+</head>
+<body>
+<header>
+<h1>MS Finance</h1>
+<p class="sub">طريقك إلى صفر ديون — لوحة مسلم العامري المالية</p>
+</header>
+
+<div class="wrap">
+<section class="grid">
+<div class="card"><div class="label">الراتب الشهري</div><div class="val gold">37,170</div><div class="small">درهم</div></div>
+<div class="card"><div class="label">إجمالي الديون الحالي</div><div class="val gold" id="totalDebtTop">690,095</div><div class="small">درهم</div></div>
+<div class="card"><div class="label">الأقساط الشهرية</div><div class="val">16,596</div><div class="small">درهم</div></div>
+<div class="card"><div class="label">المتبقي بعد الالتزامات</div><div class="val gold">8,874</div><div class="small">درهم</div></div>
+</section>
+
+<section class="card note" style="margin-top:14px">
+<h2>ملخص الديون</h2>
+<div class="grid">
+<div><div class="label">إجمالي الديون</div><div class="val gold" id="totalDebtBox">690,095</div></div>
+<div><div class="label">إجمالي المدفوع من البداية</div><div class="val" id="paidBox">0</div></div>
+<div><div class="label">نسبة الإنجاز</div><div class="val" id="pctBox">0%</div></div>
+</div>
+</section>
+
+<section class="card" style="margin-top:14px">
+<h2>مؤشر الحرية المالية</h2>
+<div class="progress"><div class="bar" id="bar"></div></div>
+<p id="progressText"></p>
+<span class="pill" id="monthsPill"></span>
+</section>
+
+<section class="card" style="margin-top:14px">
+<h2>القروض الحالية</h2>
+<table><thead><tr><th>القرض</th><th>الرصيد</th><th>القسط</th><th>النسبة</th><th>المتبقي</th></tr></thead><tbody id="loanRows"></tbody></table>
+</section>
+
+<section class="card" style="margin-top:14px">
+<h2>حاسبة السداد الإضافي</h2>
+<div class="row">
+<div><label class="label">السداد الإضافي الشهري</label><input id="extra" type="number" value="7000"></div>
+<div><label class="label">سيناريو سريع</label><select id="scenario" onchange="setScenario()"><option value="7000">7,000</option><option value="3000">3,000</option><option value="5000">5,000</option><option value="10000">10,000</option><option value="0">بدون سداد إضافي</option></select></div>
+</div>
+<button onclick="calc()">احسب</button>
+<p id="calcResult"></p>
+</section>
+
+<section class="card" style="margin-top:14px">
+<h2>تحديث شهري</h2>
+<p class="small">اكتب الرصيد الجديد لكل قرض بعد السداد، واضغط حفظ. البيانات تُحفظ داخل المتصفح.</p>
+<div id="editLoans" class="row"></div>
+<button onclick="saveBalances()">حفظ التحديث</button>
+<button onclick="resetData()" style="background:#333;color:white">إرجاع الأرقام الأصلية</button>
+</section>
+
+<section class="card" style="margin-top:14px">
+<h2>ترتيب السداد المقترح</h2>
+<table>
+<tr><th>الترتيب</th><th>القرض</th><th>السبب</th></tr>
+<tr><td>1</td><td>قرض 48 ألف</td><td>فائدة عالية ويخلص بسرعة</td></tr>
+<tr><td>2</td><td>قرض 65 ألف</td><td>نفس الفائدة العالية</td></tr>
+<tr><td>3</td><td>التمويل الكبير</td><td>رصيد كبير ونسبة أعلى</td></tr>
+<tr><td>4</td><td>قرض السيارة</td><td>نسبته الأقل</td></tr>
+</table>
+</section>
+</div>
+
+<footer>الأرقام تقديرية وتعتمد على شروط السداد المبكر لدى البنك.</footer>
+
+<script>
+const original = 690095.17;
+const originalLoans = [
+{name:"التمويل الكبير", balance:462083.62, installment:11270.33, rate:"6.06%", months:41},
+{name:"قرض السيارة", balance:89217.00, installment:2973.90, rate:"3.70%", months:30},
+{name:"قرض 65 ألف", balance:58857.22, installment:1354.87, rate:"7.49%", months:59},
+{name:"قرض 48 ألف", balance:79937.33, installment:997.58, rate:"7.49%", months:59}
+];
+let loans = JSON.parse(localStorage.getItem("ms_loans_v2") || "null") || JSON.parse(JSON.stringify(originalLoans));
+function fmt(n){return Math.round(Number(n)).toLocaleString("en-US")}
+function total(){return loans.reduce((s,l)=>s+Number(l.balance),0)}
+function render(){
+let t=total(), paid=Math.max(0, original-t), pct=Math.max(0, Math.min(100, (paid/original)*100));
+document.getElementById("totalDebtTop").textContent=fmt(t);
+document.getElementById("totalDebtBox").textContent=fmt(t);
+document.getElementById("paidBox").textContent=fmt(paid);
+document.getElementById("pctBox").textContent=pct.toFixed(1)+"%";
+document.getElementById("bar").style.width=pct.toFixed(1)+"%";
+document.getElementById("progressText").innerHTML=`أنجزت <b class="gold">${pct.toFixed(1)}%</b> من رحلة صفر ديون. المتبقي: <b>${fmt(t)}</b> درهم.`;
+document.getElementById("loanRows").innerHTML=loans.map(l=>`<tr><td>${l.name}</td><td>${fmt(l.balance)}</td><td>${fmt(l.installment)}</td><td>${l.rate}</td><td>${l.months} شهر</td></tr>`).join("");
+document.getElementById("editLoans").innerHTML=loans.map((l,i)=>`<div><label class="label">${l.name}</label><input id="loan${i}" type="number" value="${Number(l.balance).toFixed(2)}"></div>`).join("");
+calc();
+}
+function setScenario(){document.getElementById("extra").value=document.getElementById("scenario").value;calc()}
+function calc(){
+let extra=Number(document.getElementById("extra").value||0);
+let monthly=16596+extra;
+let months=monthly>0?Math.ceil(total()/monthly):0;
+document.getElementById("monthsPill").textContent=`تقديريًا: ${months} شهر للوصول إلى صفر ديون`;
+document.getElementById("calcResult").innerHTML=`مع سداد إضافي <b class="gold">${fmt(extra)}</b> درهم شهريًا، تحتاج تقريبًا <b class="gold">${months}</b> شهر. إجمالي الدفع الشهري نحو الديون: <b>${fmt(monthly)}</b> درهم.`;
+}
+function saveBalances(){
+loans=loans.map((l,i)=>({...l,balance:Number(document.getElementById("loan"+i).value||0)}));
+localStorage.setItem("ms_loans_v2", JSON.stringify(loans));
+render(); alert("تم حفظ التحديث الشهري");
+}
+function resetData(){localStorage.removeItem("ms_loans_v2"); loans=JSON.parse(JSON.stringify(originalLoans)); render();}
+render();
+</script>
+</body>
+</html>
